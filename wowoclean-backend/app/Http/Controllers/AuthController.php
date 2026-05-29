@@ -2,16 +2,62 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
     use ApiResponse;
+
+    /**
+     * @return \PHPOpenSourceSaver\JWTAuth\JWTGuard
+     */
     protected function guard()
     {
         return auth('api');
+    }
+
+    /**
+     * @OA\Post(
+     * path="/api/v1/register",
+     * tags={"Authentication"},
+     * summary="Registrasi akun baru (Role: User)",
+     * @OA\RequestBody(
+     * required=true,
+     * @OA\JsonContent(
+     * required={"name","email","password"},
+     * @OA\Property(property="name", type="string", example="Operator Tambahan"),
+     * @OA\Property(property="email", type="string", format="email", example="operator@wowoclean.com"),
+     * @OA\Property(property="password", type="string", format="password", example="password123")
+     * )
+     * ),
+     * @OA\Response(response=201, description="User registered successfully"),
+     * @OA\Response(response=422, description="Validation failed")
+     * )
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse('Validation failed', 422, $validator->errors());
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'user'
+        ]);
+
+        return $this->successResponse($user, 'User registered successfully', 201);
     }
 
     /**

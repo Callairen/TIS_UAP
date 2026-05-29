@@ -32,24 +32,46 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+function switchAuthView(target) {
+    if (target === 'login') {
+        document.getElementById('view-register').classList.add('hidden');
+        document.getElementById('view-login').classList.remove('hidden');
+    } else {
+        document.getElementById('view-login').classList.add('hidden');
+        document.getElementById('view-register').classList.remove('hidden');
+    }
+}
+
+document.getElementById('link-to-register').addEventListener('click', (e) => {
+    e.preventDefault();
+    switchAuthView('register');
+});
+
+document.getElementById('link-to-login').addEventListener('click', (e) => {
+    e.preventDefault();
+    switchAuthView('login');
+});
+
 function checkAuthState() {
     const token = localStorage.getItem('jwt_token');
     if (token) {
         document.getElementById('view-login').classList.add('hidden');
+        document.getElementById('view-register').classList.add('hidden');
         document.getElementById('view-dashboard').classList.remove('hidden');
         
         const role = localStorage.getItem('user_role');
         document.getElementById('user-role-display').textContent = role.toUpperCase();
         
         if (role === 'admin') {
-            document.getElementById('admin-panel').classList.remove('hidden');
+            document.getElementById('create-panel').classList.remove('hidden');
         } else {
-            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('create-panel').classList.add('hidden');
         }
         
         fetchContainers();
     } else {
         document.getElementById('view-dashboard').classList.add('hidden');
+        document.getElementById('view-register').classList.add('hidden');
         document.getElementById('view-login').classList.remove('hidden');
     }
 }
@@ -69,6 +91,32 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         checkAuthState();
     } catch (error) {
         showToast('Gagal masuk: Kredensial tidak valid', 'error');
+    }
+});
+
+document.getElementById('form-register').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    document.getElementById('err-reg-email').textContent = '';
+    
+    const payload = {
+        name: document.getElementById('register-name').value,
+        email: document.getElementById('register-email').value,
+        password: document.getElementById('register-password').value
+    };
+
+    try {
+        await axios.post(`${API_URL}/register`, payload);
+        document.getElementById('form-register').reset();
+        showToast('Registrasi berhasil, silakan masuk dengan akun baru Anda');
+        switchAuthView('login');
+    } catch (error) {
+        if (error.response && error.response.status === 422) {
+            const errors = error.response.data.errors;
+            if (errors.email) document.getElementById('err-reg-email').textContent = errors.email[0];
+            showToast('Validasi gagal, periksa input Anda', 'error');
+        } else {
+            showToast('Terjadi kesalahan pada sistem registrasi', 'error');
+        }
     }
 });
 
@@ -115,16 +163,15 @@ function renderContainers(containers) {
         
         const statusClass = item.status === 'Active' ? 'status-active' : 'status-archived';
         
-        let adminButtons = '';
+        let actionButtons = `<button onclick="viewLogs(${item.id}, '${item.container_id}')" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Log</button>`;
+        
         if (role === 'admin') {
             const archiveBtn = item.status === 'Active' 
                 ? `<button onclick="archiveContainer(${item.id})" class="btn btn-warning">Archive</button>` 
                 : '';
-            adminButtons = `
-                <div class="card-actions">
-                    ${archiveBtn}
-                    <button onclick="deleteContainer(${item.id})" class="btn btn-danger">Hapus</button>
-                </div>
+            actionButtons += `
+                ${archiveBtn}
+                <button onclick="deleteContainer(${item.id})" class="btn btn-danger">Hapus</button>
             `;
         }
 
@@ -142,7 +189,9 @@ function renderContainers(containers) {
                     <span>Berat</span>
                     <strong>${item.weight_kg} kg</strong>
                 </div>
-                ${adminButtons}
+                <div class="card-actions">
+                    ${actionButtons}
+                </div>
             </div>
         `;
     });
@@ -198,6 +247,35 @@ window.deleteContainer = async function(id) {
     } catch (error) {
         showToast('Gagal menghapus kontainer', 'error');
     }
+}
+
+window.viewLogs = async function(id, container_id) {
+    try {
+        const response = await axios.get(`${API_URL}/gateway/containers/${id}/logs`);
+        const logs = response.data.data;
+        const content = document.getElementById('log-content');
+        document.getElementById('log-modal-title').textContent = `Log: ${container_id}`;
+        
+        if (logs.length === 0) {
+            content.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Belum ada log perjalanan.</p>';
+        } else {
+            content.innerHTML = logs.map(log => `
+                <div style="border-left: 2px solid var(--primary); padding-left: 1rem;">
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">${new Date(log.timestamp).toLocaleString('id-ID')}</div>
+                    <div style="font-weight: 500;">${log.location}</div>
+                    <div style="font-size: 0.9rem;">${log.description}</div>
+                </div>
+            `).join('');
+        }
+        
+        document.getElementById('log-modal').classList.remove('hidden');
+    } catch (error) {
+        showToast('Gagal memuat log perjalanan', 'error');
+    }
+}
+
+window.closeLogModal = function() {
+    document.getElementById('log-modal').classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', checkAuthState);
