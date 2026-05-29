@@ -8,13 +8,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Info(
+ * version="1.0.0",
+ * title="WowoClean API Documentation",
+ * description="Enterprise REST API WowoClean"
+ * )
+ * @OA\Server(
+ * url="http://127.0.0.1:8000"
+ * )
+ * @OA\SecurityScheme(
+ * securityScheme="bearerAuth",
+ * type="http",
+ * scheme="bearer",
+ * bearerFormat="JWT"
+ * )
+ */
 class AuthController extends Controller
 {
     use ApiResponse;
 
-    /**
-     * @return \PHPOpenSourceSaver\JWTAuth\JWTGuard
-     */
     protected function guard()
     {
         return auth('api');

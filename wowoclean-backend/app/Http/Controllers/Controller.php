@@ -6,14 +6,13 @@ namespace App\Http\Controllers;
  * @OA\Info(
  * version="1.0.0",
  * title="WowoClean API Documentation",
- * description="Enterprise REST API WowoClean (UAP TIS TI-C)",
+ * description="Enterprise REST API WowoClean (UAP TIS TI-C)"
  * )
- *
  * @OA\Server(
- * url=L5_SWAGGER_CONST_HOST,
+ * url="http://127.0.0.1:8000",
  * description="API Server"
  * )
- * * @OA\SecurityScheme(
+ * @OA\SecurityScheme(
  * securityScheme="bearerAuth",
  * type="http",
  * scheme="bearer",
