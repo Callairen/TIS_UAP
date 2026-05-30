@@ -17,7 +17,7 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Registrasi akun baru (Role: User)",
+                "summary": "Registrasi entitas pengguna baru (Role: User)",
                 "operationId": "6796c44e1f6079c411abbfed066c5907",
                 "requestBody": {
                     "required": true,
@@ -52,10 +52,10 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "User registered successfully"
+                        "description": "Registrasi berhasil"
                     },
                     "422": {
-                        "description": "Validation failed"
+                        "description": "Validasi gagal"
                     }
                 }
             }
@@ -65,7 +65,7 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Login user dan mendapatkan Token JWT",
+                "summary": "Otentikasi kredensial dan akuisisi Token JWT",
                 "operationId": "da2ca4d7a5cdec77b8b45a20373535cb",
                 "requestBody": {
                     "required": true,
@@ -95,48 +95,71 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Login successful"
+                        "description": "Otentikasi sukses"
                     },
                     "401": {
-                        "description": "Invalid credentials"
-                    },
-                    "422": {
-                        "description": "Validation failed"
+                        "description": "Kredensial tidak valid"
                     }
                 }
+            }
+        },
+        "/api/v1/profile": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Inspeksi data profil pengguna (Token Required)",
+                "operationId": "e7fa93473c44547baf6183ba42322df2",
+                "responses": {
+                    "200": {
+                        "description": "Data profil berhasil dimuat"
+                    },
+                    "401": {
+                        "description": "Akses ditolak (Unauthorized)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/logout": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Terminasi sesi (Invalidasi Token JWT)",
+                "operationId": "c4eddaf1a2e990cc90e4326c0d731d41",
+                "responses": {
+                    "200": {
+                        "description": "Sesi berhasil diakhiri"
+                    },
+                    "401": {
+                        "description": "Akses ditolak (Unauthorized)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
             }
         },
         "/api/v1/gateway/containers": {
             "get": {
                 "tags": [
-                    "Containers"
+                    "Containers (Gateway)"
                 ],
-                "summary": "Ambil Data Kontainer via Gateway",
+                "summary": "Ambil seluruh data kontainer",
                 "operationId": "c8a2aaa7f663413a114d18c5e173d11f",
-                "parameters": [
-                    {
-                        "name": "type",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "min_weight",
-                        "in": "query",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "Success"
+                        "description": "Data berhasil ditarik"
                     },
                     "401": {
-                        "description": "Unauthorized"
+                        "description": "Akses ditolak"
                     }
                 },
                 "security": [
@@ -147,9 +170,9 @@
             },
             "post": {
                 "tags": [
-                    "Containers"
+                    "Containers (Gateway)"
                 ],
-                "summary": "Tambah Kontainer via Gateway (Admin Only)",
+                "summary": "Registrasi kontainer baru (Admin Eksklusif)",
                 "operationId": "b3f02229a3d7b316446d1fa45d9c9604",
                 "requestBody": {
                     "required": true,
@@ -182,13 +205,146 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Container created"
+                        "description": "Kontainer terdaftar"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Akses Ditolak (Forbidden Role)"
                     },
                     "422": {
-                        "description": "Validation failed"
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gateway/containers/search": {
+            "get": {
+                "tags": [
+                    "Containers (Gateway)"
+                ],
+                "summary": "Pencarian kontainer dengan parameter filter",
+                "operationId": "770ffb206edd3edee03c103cf4c36c93",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_weight",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hasil pencarian berhasil ditarik"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gateway/containers/{id}/archive": {
+            "patch": {
+                "tags": [
+                    "Containers (Gateway)"
+                ],
+                "summary": "Ubah status kontainer menjadi Archived (Admin)",
+                "operationId": "6bc059ac58eaca5134975156debacbaa",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status berhasil diubah"
+                    },
+                    "403": {
+                        "description": "Akses Ditolak (Forbidden Role)"
+                    },
+                    "404": {
+                        "description": "Kontainer tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gateway/containers/{id}": {
+            "delete": {
+                "tags": [
+                    "Containers (Gateway)"
+                ],
+                "summary": "Hapus data kontainer (Admin Eksklusif)",
+                "operationId": "526b15934fc7bf89ba909708ce954f44",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Kontainer berhasil dihapus"
+                    },
+                    "403": {
+                        "description": "Akses Ditolak (Forbidden Role)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/gateway/containers/{id}/logs": {
+            "get": {
+                "tags": [
+                    "Containers (Gateway)"
+                ],
+                "summary": "Ambil log perjalanan spesifik kontainer",
+                "operationId": "dc3d93f8c3bb74b22e2536236071786b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Log berhasil ditarik"
                     }
                 },
                 "security": [
@@ -214,8 +370,8 @@
             "description": "Authentication"
         },
         {
-            "name": "Containers",
-            "description": "Containers"
+            "name": "Containers (Gateway)",
+            "description": "Containers (Gateway)"
         }
     ]
 }

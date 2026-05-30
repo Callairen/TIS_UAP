@@ -20,7 +20,7 @@ class AuthController extends Controller
 
     #[OA\Post(
         path: "/api/v1/register",
-        summary: "Registrasi akun baru (Role: User)",
+        summary: "Registrasi entitas pengguna baru (Role: User)",
         tags: ["Authentication"],
         requestBody: new OA\RequestBody(
             required: true,
@@ -34,8 +34,8 @@ class AuthController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: "User registered successfully"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 201, description: "Registrasi berhasil"),
+            new OA\Response(response: 422, description: "Validasi gagal")
         ]
     )]
     public function register(Request $request)
@@ -62,7 +62,7 @@ class AuthController extends Controller
 
     #[OA\Post(
         path: "/api/v1/login",
-        summary: "Login user dan mendapatkan Token JWT",
+        summary: "Otentikasi kredensial dan akuisisi Token JWT",
         tags: ["Authentication"],
         requestBody: new OA\RequestBody(
             required: true,
@@ -75,9 +75,8 @@ class AuthController extends Controller
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Login successful"),
-            new OA\Response(response: 401, description: "Invalid credentials"),
-            new OA\Response(response: 422, description: "Validation failed")
+            new OA\Response(response: 200, description: "Otentikasi sukses"),
+            new OA\Response(response: 401, description: "Kredensial tidak valid")
         ]
     )]
     public function login(Request $request)
@@ -100,15 +99,34 @@ class AuthController extends Controller
         return $this->respondWithToken($token, 'Login successful');
     }
 
+    #[OA\Get(
+        path: "/api/v1/profile",
+        summary: "Inspeksi data profil pengguna (Token Required)",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        responses: [
+            new OA\Response(response: 200, description: "Data profil berhasil dimuat"),
+            new OA\Response(response: 401, description: "Akses ditolak (Unauthorized)")
+        ]
+    )]
     public function profile()
     {
         return $this->successResponse($this->guard()->user(), 'Profile retrieved successfully');
     }
 
+    #[OA\Post(
+        path: "/api/v1/logout",
+        summary: "Terminasi sesi (Invalidasi Token JWT)",
+        security: [["bearerAuth" => []]],
+        tags: ["Authentication"],
+        responses: [
+            new OA\Response(response: 200, description: "Sesi berhasil diakhiri"),
+            new OA\Response(response: 401, description: "Akses ditolak (Unauthorized)")
+        ]
+    )]
     public function logout()
     {
         $this->guard()->logout();
-        
         return $this->successResponse(null, 'Successfully logged out');
     }
 
