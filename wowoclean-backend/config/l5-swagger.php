@@ -15,9 +15,8 @@ return [
                 'api' => 'api/documentation',
             ],
             'paths' => [
-                /*
-                 * Edit to include full URL in ui for assets
-                 */
+                base_path('app/Http/Controllers'),             // ADD THIS
+                base_path('app/Http/Controllers/API'), 
                 'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
 
                 /*

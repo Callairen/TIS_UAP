@@ -6,24 +6,26 @@ use App\Models\Container;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
+use OpenApi\Attributes as OA;
 
 class ContainerController extends Controller
 {
     use ApiResponse;
 
-    /**
-     * @OA\Get(
-     * path="/api/v1/gateway/containers",
-     * tags={"Containers"},
-     * summary="Ambil Data Kontainer via Gateway",
-     * security={{"bearerAuth":{}}},
-     * @OA\Parameter(name="type", in="query", required=false, @OA\Schema(type="string")),
-     * @OA\Parameter(name="min_weight", in="query", required=false, @OA\Schema(type="integer")),
-     * @OA\Response(response=200, description="Success"),
-     * @OA\Response(response=401, description="Unauthorized")
-     * )
-     */
+    #[OA\Get(
+        path: "/api/v1/gateway/containers",
+        summary: "Ambil Data Kontainer via Gateway",
+        security: [["bearerAuth" => []]],
+        tags: ["Containers"],
+        parameters: [
+            new OA\Parameter(name: "type", in: "query", required: false, schema: new OA\Schema(type: "string")),
+            new OA\Parameter(name: "min_weight", in: "query", required: false, schema: new OA\Schema(type: "integer"))
+        ],
+        responses: [
+            new OA\Response(response: 200, description: "Success"),
+            new OA\Response(response: 401, description: "Unauthorized")
+        ]
+    )]
     public function index(Request $request)
     {
         $query = Container::query();
@@ -39,26 +41,28 @@ class ContainerController extends Controller
         return $this->successResponse($query->get());
     }
 
-    /**
-     * @OA\Post(
-     * path="/api/v1/gateway/containers",
-     * tags={"Containers"},
-     * summary="Tambah Kontainer via Gateway (Admin Only)",
-     * security={{"bearerAuth":{}}},
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\JsonContent(
-     * required={"container_id","waste_type","weight_kg"},
-     * @OA\Property(property="container_id", type="string", example="WH12345"),
-     * @OA\Property(property="waste_type", type="string", example="Plastic"),
-     * @OA\Property(property="weight_kg", type="integer", example=500)
-     * )
-     * ),
-     * @OA\Response(response=201, description="Container created"),
-     * @OA\Response(response=403, description="Forbidden"),
-     * @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/gateway/containers",
+        summary: "Tambah Kontainer via Gateway (Admin Only)",
+        security: [["bearerAuth" => []]],
+        tags: ["Containers"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["container_id", "waste_type", "weight_kg"],
+                properties: [
+                    new OA\Property(property: "container_id", type: "string", example: "WH12345"),
+                    new OA\Property(property: "waste_type", type: "string", example: "Plastic"),
+                    new OA\Property(property: "weight_kg", type: "integer", example: 500)
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "Container created"),
+            new OA\Response(response: 403, description: "Forbidden"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

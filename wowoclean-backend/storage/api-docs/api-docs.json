@@ -1,0 +1,221 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "WowoClean API Documentation",
+        "description": "Enterprise REST API WowoClean (UAP TIS TI-C)",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "API Server"
+        }
+    ],
+    "paths": {
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Registrasi akun baru (Role: User)",
+                "operationId": "6796c44e1f6079c411abbfed066c5907",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Operator Tambahan"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "operator@wowoclean.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/v1/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login user dan mendapatkan Token JWT",
+                "operationId": "da2ca4d7a5cdec77b8b45a20373535cb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "admin@wowoclean.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                }
+            }
+        },
+        "/api/v1/gateway/containers": {
+            "get": {
+                "tags": [
+                    "Containers"
+                ],
+                "summary": "Ambil Data Kontainer via Gateway",
+                "operationId": "c8a2aaa7f663413a114d18c5e173d11f",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "min_weight",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Containers"
+                ],
+                "summary": "Tambah Kontainer via Gateway (Admin Only)",
+                "operationId": "b3f02229a3d7b316446d1fa45d9c9604",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "container_id",
+                                    "waste_type",
+                                    "weight_kg"
+                                ],
+                                "properties": {
+                                    "container_id": {
+                                        "type": "string",
+                                        "example": "WH12345"
+                                    },
+                                    "waste_type": {
+                                        "type": "string",
+                                        "example": "Plastic"
+                                    },
+                                    "weight_kg": {
+                                        "type": "integer",
+                                        "example": 500
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Container created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "422": {
+                        "description": "Validation failed"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "Containers",
+            "description": "Containers"
+        }
+    ]
+}

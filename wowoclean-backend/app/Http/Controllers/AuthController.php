@@ -7,23 +7,8 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use OpenApi\Attributes as OA;
 
-/**
- * @OA\Info(
- * version="1.0.0",
- * title="WowoClean API Documentation",
- * description="Enterprise REST API WowoClean"
- * )
- * @OA\Server(
- * url="http://127.0.0.1:8000"
- * )
- * @OA\SecurityScheme(
- * securityScheme="bearerAuth",
- * type="http",
- * scheme="bearer",
- * bearerFormat="JWT"
- * )
- */
 class AuthController extends Controller
 {
     use ApiResponse;
@@ -33,24 +18,26 @@ class AuthController extends Controller
         return auth('api');
     }
 
-    /**
-     * @OA\Post(
-     * path="/api/v1/register",
-     * tags={"Authentication"},
-     * summary="Registrasi akun baru (Role: User)",
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\JsonContent(
-     * required={"name","email","password"},
-     * @OA\Property(property="name", type="string", example="Operator Tambahan"),
-     * @OA\Property(property="email", type="string", format="email", example="operator@wowoclean.com"),
-     * @OA\Property(property="password", type="string", format="password", example="password123")
-     * )
-     * ),
-     * @OA\Response(response=201, description="User registered successfully"),
-     * @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/register",
+        summary: "Registrasi akun baru (Role: User)",
+        tags: ["Authentication"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["name", "email", "password"],
+                properties: [
+                    new OA\Property(property: "name", type: "string", example: "Operator Tambahan"),
+                    new OA\Property(property: "email", type: "string", format: "email", example: "operator@wowoclean.com"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 201, description: "User registered successfully"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -73,24 +60,26 @@ class AuthController extends Controller
         return $this->successResponse($user, 'User registered successfully', 201);
     }
 
-    /**
-     * @OA\Post(
-     * path="/api/v1/login",
-     * tags={"Authentication"},
-     * summary="Login user dan mendapatkan Token JWT",
-     * @OA\RequestBody(
-     * required=true,
-     * @OA\JsonContent(
-     * required={"email","password"},
-     * @OA\Property(property="email", type="string", format="email", example="admin@wowoclean.com"),
-     * @OA\Property(property="password", type="string", format="password", example="password123")
-     * )
-     * ),
-     * @OA\Response(response=200, description="Login successful"),
-     * @OA\Response(response=401, description="Invalid credentials"),
-     * @OA\Response(response=422, description="Validation failed")
-     * )
-     */
+    #[OA\Post(
+        path: "/api/v1/login",
+        summary: "Login user dan mendapatkan Token JWT",
+        tags: ["Authentication"],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ["email", "password"],
+                properties: [
+                    new OA\Property(property: "email", type: "string", format: "email", example: "admin@wowoclean.com"),
+                    new OA\Property(property: "password", type: "string", format: "password", example: "password123")
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: "Login successful"),
+            new OA\Response(response: 401, description: "Invalid credentials"),
+            new OA\Response(response: 422, description: "Validation failed")
+        ]
+    )]
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
